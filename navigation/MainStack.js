@@ -1,41 +1,47 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useAuth } from '../context/AuthContext';
 
-// Import screens
-import LoginScreen from '../screens/Auth/LoginScreen';
-import AdminStack from './AdminStack';
+// Import Stacks
+import AdminDrawer from './AdminDrawer';
 import ServiceProviderStack from './ServiceProviderStack';
 import HandymanStack from './HandymanStack';
 import UserStack from './UserStack';
 
+// Import Auth Screen
+import LoginScreen from '../screens/Auth/LoginScreen';
+
 const Stack = createNativeStackNavigator();
 
 export default function MainStack() {
-  const { user } = useAuth();
-
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {!user ? (
-        // Auth Stack
-        <Stack.Screen name="Login" component={LoginScreen} />
-      ) : (
-        // Role-based Stack
-        <>
-          {user.role === 'admin' && (
-            <Stack.Screen name="AdminStack" component={AdminStack} />
-          )}
-          {user.role === 'service_provider' && (
-            <Stack.Screen name="ServiceProviderStack" component={ServiceProviderStack} />
-          )}
-          {user.role === 'handyman' && (
-            <Stack.Screen name="HandymanStack" component={HandymanStack} />
-          )}
-          {user.role === 'user' && (
-            <Stack.Screen name="UserStack" component={UserStack} />
-          )}
-        </>
-      )}
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      {/* Auth Screens */}
+      <Stack.Screen 
+        name="Login" 
+        component={LoginScreen} 
+      />
+
+      {/* Role-based Navigation */}
+      <Stack.Screen 
+        name="AdminPanel" 
+        component={AdminDrawer}
+      />
+      <Stack.Screen 
+        name="ServiceProviderPanel" 
+        component={ServiceProviderStack}
+      />
+      <Stack.Screen 
+        name="HandymanPanel" 
+        component={HandymanStack}
+      />
+      <Stack.Screen 
+        name="UserPanel" 
+        component={UserStack}
+      />
     </Stack.Navigator>
   );
 }

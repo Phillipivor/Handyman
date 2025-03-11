@@ -6,104 +6,145 @@ import {
   ScrollView,
   TouchableOpacity,
   Platform,
-  useWindowDimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useAuth } from '../../context/AuthContext';
 
 export default function Dashboard() {
   const navigation = useNavigation();
-  const { logout } = useAuth();
-  const { width } = useWindowDimensions();
 
-  // Mock statistics data
-  const stats = [
-    { title: 'Total Users', value: '1,234', color: '#3b82f6' },
-    { title: 'Active Handymen', value: '89', color: '#10b981' },
-    { title: 'Pending Jobs', value: '45', color: '#f59e0b' },
-    { title: 'Completed Jobs', value: '756', color: '#6366f1' },
+  // Mock data for dashboard statistics
+  const statistics = {
+    totalServices: '1,234',
+    totalTaxes: '$5,678',
+    myEarnings: '$12,345',
+    totalRevenue: '$45,678',
+  };
+
+  // Mock data for recent lists
+  const recentProviders = [
+    { id: '1', name: 'John Smith', services: 45, rating: 4.8 },
+    { id: '2', name: 'Sarah Wilson', services: 38, rating: 4.9 },
+    { id: '3', name: 'Mike Johnson', services: 32, rating: 4.7 },
   ];
 
-  const menuItems = [
+  const recentCustomers = [
+    { id: '1', name: 'Alice Brown', bookings: 12, totalSpent: '$560' },
+    { id: '2', name: 'Bob Wilson', bookings: 8, totalSpent: '$420' },
+    { id: '3', name: 'Carol White', bookings: 5, totalSpent: '$280' },
+  ];
+
+  const recentBookings = [
     {
-      title: 'Manage Users',
-      icon: '👥',
-      onPress: () => navigation.navigate('ManageUsers'),
-      color: '#bfdbfe',
+      id: '1',
+      service: 'Plumbing Repair',
+      customer: 'Alice Brown',
+      amount: '$120',
+      status: 'completed',
     },
     {
-      title: 'Reports',
-      icon: '📊',
-      onPress: () => navigation.navigate('Reports'),
-      color: '#bbf7d0',
+      id: '2',
+      service: 'Electrical Work',
+      customer: 'Bob Wilson',
+      amount: '$180',
+      status: 'pending',
     },
     {
-      title: 'Settings',
-      icon: '⚙️',
-      onPress: () => navigation.navigate('Settings'),
-      color: '#fef3c7',
-    },
-    {
-      title: 'Logout',
-      icon: '🚪',
-      onPress: logout,
-      color: '#fecaca',
+      id: '3',
+      service: 'House Cleaning',
+      customer: 'Carol White',
+      amount: '$90',
+      status: 'in progress',
     },
   ];
+
+  const renderStatCard = (title, value, color) => (
+    <View style={[styles.statCard, { backgroundColor: color }]}>
+      <Text style={styles.statValue}>{value}</Text>
+      <Text style={styles.statTitle}>{title}</Text>
+    </View>
+  );
+
+  const renderRecentList = (title, data, viewAllScreen) => (
+    <View style={styles.section}>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>{title}</Text>
+        <TouchableOpacity onPress={() => navigation.navigate(viewAllScreen)}>
+          <Text style={styles.viewAllText}>View All</Text>
+        </TouchableOpacity>
+      </View>
+
+      {data.map((item) => (
+        <View key={item.id} style={styles.listItem}>
+          {title === 'Recent Providers' && (
+            <>
+              <Text style={styles.itemName}>{item.name}</Text>
+              <Text style={styles.itemDetail}>Services: {item.services}</Text>
+              <Text style={styles.itemDetail}>Rating: ⭐ {item.rating}</Text>
+            </>
+          )}
+          {title === 'Recent Customers' && (
+            <>
+              <Text style={styles.itemName}>{item.name}</Text>
+              <Text style={styles.itemDetail}>Bookings: {item.bookings}</Text>
+              <Text style={styles.itemDetail}>Total Spent: {item.totalSpent}</Text>
+            </>
+          )}
+          {title === 'Recent Bookings' && (
+            <>
+              <Text style={styles.itemName}>{item.service}</Text>
+              <Text style={styles.itemDetail}>Customer: {item.customer}</Text>
+              <View style={styles.bookingFooter}>
+                <Text style={styles.itemAmount}>{item.amount}</Text>
+                <Text style={[
+                  styles.statusBadge,
+                  { backgroundColor: getStatusColor(item.status) }
+                ]}>
+                  {item.status.toUpperCase()}
+                </Text>
+              </View>
+            </>
+          )}
+        </View>
+      ))}
+    </View>
+  );
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'completed':
+        return '#dcfce7';
+      case 'pending':
+        return '#fef3c7';
+      case 'in progress':
+        return '#dbeafe';
+      default:
+        return '#f3f4f6';
+    }
+  };
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Admin Dashboard</Text>
-        <Text style={styles.headerSubtitle}>Welcome back, Admin!</Text>
-      </View>
-
+      {/* Statistics Section */}
       <View style={styles.statsContainer}>
-        {stats.map((stat, index) => (
-          <View 
-            key={index}
-            style={[
-              styles.statCard,
-              { backgroundColor: stat.color + '10' },
-              { width: width > 768 ? '23%' : '48%' }
-            ]}
-          >
-            <Text style={[styles.statValue, { color: stat.color }]}>
-              {stat.value}
-            </Text>
-            <Text style={styles.statTitle}>{stat.title}</Text>
-          </View>
-        ))}
+        {renderStatCard('Total Services', statistics.totalServices, '#bfdbfe')}
+        {renderStatCard('Total Taxes', statistics.totalTaxes, '#bbf7d0')}
+        {renderStatCard('My Earnings', statistics.myEarnings, '#fde68a')}
+        {renderStatCard('Total Revenue', statistics.totalRevenue, '#ddd6fe')}
       </View>
 
-      <View style={styles.menuGrid}>
-        {menuItems.map((item, index) => (
-          <TouchableOpacity
-            key={index}
-            style={[
-              styles.menuItem,
-              { backgroundColor: item.color },
-              { width: width > 768 ? '23%' : '48%' }
-            ]}
-            onPress={item.onPress}
-          >
-            <Text style={styles.menuIcon}>{item.icon}</Text>
-            <Text style={styles.menuTitle}>{item.title}</Text>
-          </TouchableOpacity>
-        ))}
+      {/* Charts Section */}
+      <View style={styles.chartsSection}>
+        <Text style={styles.sectionTitle}>Analytics</Text>
+        {/* Add your charts here */}
+        <View style={styles.chartPlaceholder}>
+          <Text style={styles.placeholderText}>Charts Coming Soon</Text>
+        </View>
       </View>
 
-      <View style={styles.recentActivityContainer}>
-        <Text style={styles.sectionTitle}>Recent Activity</Text>
-        {[1, 2, 3].map((_, index) => (
-          <View key={index} style={styles.activityItem}>
-            <Text style={styles.activityText}>
-              New handyman registration approved
-            </Text>
-            <Text style={styles.activityTime}>2 hours ago</Text>
-          </View>
-        ))}
-      </View>
+      {/* Recent Lists */}
+      {renderRecentList('Recent Providers', recentProviders, 'ProviderList')}
+      {renderRecentList('Recent Customers', recentCustomers, 'CustomerList')}
+      {renderRecentList('Recent Bookings', recentBookings, 'Bookings')}
     </ScrollView>
   );
 }
@@ -113,69 +154,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8fafc',
   },
-  header: {
-    padding: 20,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e2e8f0',
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1e293b',
-  },
-  headerSubtitle: {
-    fontSize: 16,
-    color: '#64748b',
-    marginTop: 5,
-  },
   statsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
     padding: 15,
-    gap: 10,
+    gap: 15,
   },
   statCard: {
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 10,
-  },
-  statValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  statTitle: {
-    fontSize: 14,
-    color: '#64748b',
-  },
-  menuGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    padding: 15,
-    gap: 10,
-  },
-  menuItem: {
+    flex: 1,
+    minWidth: '45%',
     padding: 20,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  menuIcon: {
-    fontSize: 24,
-    marginBottom: 10,
-  },
-  menuTitle: {
-    fontSize: 16,
-    color: '#1e293b',
-    fontWeight: '500',
-  },
-  recentActivityContainer: {
-    padding: 20,
-    backgroundColor: '#fff',
-    margin: 15,
     borderRadius: 12,
     ...Platform.select({
       ios: {
@@ -189,28 +177,86 @@ const styles = StyleSheet.create({
       },
     }),
   },
+  statValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#1e293b',
+    marginBottom: 5,
+  },
+  statTitle: {
+    fontSize: 14,
+    color: '#64748b',
+  },
+  chartsSection: {
+    padding: 15,
+    backgroundColor: '#fff',
+    marginBottom: 15,
+  },
+  chartPlaceholder: {
+    height: 200,
+    backgroundColor: '#f1f5f9',
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  placeholderText: {
+    fontSize: 16,
+    color: '#64748b',
+  },
+  section: {
+    backgroundColor: '#fff',
+    padding: 15,
+    marginBottom: 15,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#1e293b',
-    marginBottom: 15,
   },
-  activityItem: {
+  viewAllText: {
+    fontSize: 14,
+    color: '#2563eb',
+    fontWeight: '500',
+  },
+  listItem: {
+    backgroundColor: '#f8fafc',
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  itemName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1e293b',
+    marginBottom: 5,
+  },
+  itemDetail: {
+    fontSize: 14,
+    color: '#64748b',
+    marginBottom: 3,
+  },
+  bookingFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e2e8f0',
+    marginTop: 5,
   },
-  activityText: {
-    fontSize: 14,
-    color: '#334155',
-    flex: 1,
+  itemAmount: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#0284c7',
   },
-  activityTime: {
+  statusBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
     fontSize: 12,
-    color: '#64748b',
-    marginLeft: 10,
+    fontWeight: '500',
   },
 });
